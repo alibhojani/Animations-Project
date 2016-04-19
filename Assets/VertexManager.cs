@@ -15,7 +15,7 @@ public class VertexManager : MonoBehaviour {
 	void Start () {
 		vertices = GetComponentsInChildren<vertex> ();
 		constraints = new List<Constraint>();
-		StartCoroutine("GenerateConstraints");
+		GenerateConstraints();
 	}
 	
 	// Update is called once per frame
@@ -52,8 +52,8 @@ public class VertexManager : MonoBehaviour {
 		}
 	}
 	IEnumerator positionBasedSimulation () { 
-		StartCoroutine("CalculateExternalForces"); 
-		StartCoroutine("DampVelocity"); 
+		CalculateExternalForces();
+		DampVelocity();
 
 		Vector3[] p = new Vector3[vertices.Length];
 		for (int i = 0; i < vertices.Length; i++) { 
@@ -79,25 +79,25 @@ public class VertexManager : MonoBehaviour {
 	}
 
 
-	IEnumerator CalculateExternalForces () { 
+	void CalculateExternalForces () { 
 		if (enableGravity) { 
 			for (int i = 0; i < vertices.Length; i++) { 
 				vertices[i].velocity += new Vector3(0f, gravity * Time.fixedDeltaTime, 0f); //fixed delta time debatable.
 			}
 		}
-		yield return null;
+
 	}
 
 	// TODO: implement according to paper 
-	IEnumerator DampVelocity () { 
-		yield return null;
+	void DampVelocity () { 
+		
 	}
 
 
 	//for now this is a silly thing that i have made up for quick testing; can make this better so that we 
 	// just have to specify what kind of thing it is and it reads the constraints, vertices from a file 
 	// and bingo
-	IEnumerator GenerateConstraints () { 
+	void GenerateConstraints () { 
 		vertex firstVertex = vertices[0];
 		FixedPoint fp = new FixedPoint(0, firstVertex);
 		firstVertex.GetComponent<Renderer>().material.color = Color.black;
@@ -113,7 +113,7 @@ public class VertexManager : MonoBehaviour {
 				}
 			}
 		}
-		yield return null;
+
 	}
 		
 

@@ -11,6 +11,9 @@ public class VertexManager : MonoBehaviour {
 	public float gravity = -9.81f; 
 	bool startSimulation = false;
 	public bool enableGravity = true; 
+	private int rows = 4;
+	private int columns = 9;
+
 
 	void Start () {
 		vertices = GetComponentsInChildren<vertex> ();
@@ -24,8 +27,6 @@ public class VertexManager : MonoBehaviour {
 			StartCoroutine("positionBasedSimulation");
 		}
 		DrawEdges();
-
-
 	}
 
 	void Update () { 
@@ -44,8 +45,13 @@ public class VertexManager : MonoBehaviour {
 			vertex[] involved = constraints[i].getVertices();
 			for (int j = 0; j < involved.Length; j++) { 
 				for (int k = 0; k < involved.Length; k++) { 
-					if (j != k) { 
-						Debug.DrawLine(involved[j].transform.position, involved[k].transform.position);
+					if (constraints[i].GetType().Name.Equals ("Stretch")) { 
+						if (j != k) { 
+							Debug.DrawLine(involved[j].transform.position, involved[k].transform.position);
+						}
+					}
+					else if (constraints[i].GetType().Name.Equals ("Bend")) { 
+						Debug.DrawLine(involved[0].transform.position, involved[1].transform.position, Color.magenta);
 					}
 				}
 			}
@@ -94,9 +100,9 @@ public class VertexManager : MonoBehaviour {
 	}
 
 
-	//for now this is a silly thing that i have made up for quick testing; can make this better so that we 
-	// just have to specify what kind of thing it is and it reads the constraints, vertices from a file 
-	// and bingo
+	/*
+	 * kind of an expensive method, but for my purposes we dont need a dynamic constraint generator, so be it
+	 */
 	void GenerateConstraints () { 
 		vertex firstVertex = vertices[0];
 		FixedPoint fp = new FixedPoint(0, firstVertex);
@@ -112,6 +118,15 @@ public class VertexManager : MonoBehaviour {
 					}
 				}
 			}
+		}
+		//diagonal edges 
+		for (int i = 0; i < (rows-1)*(columns-1)+2; i++) {
+			if (i%columns == (columns-1)) continue;
+			Stretch s = new Stretch(i, i+columns+1, vertices[i], vertices[i + columns+ 1]);
+			Bend b = new Bend(i, i+columns+1, i+1, i+columns, 
+				vertices[i], vertices[i+columns+1], vertices[i+1], vertices[i+columns]);
+			constraints.Add(s);
+			constraints.Add(b);
 		}
 
 	}

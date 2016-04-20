@@ -21,8 +21,11 @@ public class Stretch : Constraint {
 	public void projectConstraint(Vector3[] ps) { 
 		Vector3 p1 = ps[indexV1];
 		Vector3 p2 = ps[indexV2];
+
 		if (once) { //PROBLEM DUE TO GENERATECOLLISIONCONSTRAINTS IS HERE
-			Debug.Log(p1 + ", " + p2);
+			for (int i = 0; i < ps.Length; i++) { 
+				Debug.Log(p1 + ", " + p2);
+			} 
 			once = false; 
 		}
 		float deltaP1Scale = -1f*(v1.w/(v1.w + v2.w))*((p1 - p2).magnitude - l0);

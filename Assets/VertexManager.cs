@@ -25,7 +25,7 @@ public class VertexManager : MonoBehaviour {
 			vertex v = new vertex(mesh.vertices[i]);
 			vertices[i] = v;
 		}
-		//Debug.Log(vertices[0].ToString());
+
 		constraints = new List<Constraint>();
 		GenerateConstraints();
 	}
@@ -81,12 +81,14 @@ public class VertexManager : MonoBehaviour {
 		for (int i = 0; i < vertices.Length; i++) { 
 			p[i] = vertices[i].position + (vertices[i].velocity * Time.fixedDeltaTime); //fixed delta time debatable.
 		}
+
 		/*if (once) { 
-			for (int i = 0; i < p.Length; i++) { 
-				Debug.Log(p[i]);
-			}
-			once = false;
+			Debug.Log(p[mesh.triangles[0]]);
+			Debug.Log(p[mesh.triangles[1]]);
+			Debug.Log(p[mesh.triangles[2]]);
+			once = false; 
 		}*/
+			
 		//TODO:generate collision constraints 
 
 		for (int i = 0; i < iterations; i++) { 
@@ -97,8 +99,8 @@ public class VertexManager : MonoBehaviour {
 
 		//velocity and position update in accordance with constraint projections 
 		for (int i = 0; i < vertices.Length; i++) { 
-			vertices[i].velocity = (p[i] - vertices[i].position)/Time.fixedDeltaTime; //fixed delta time debatable.
-			vertices[i].position = p[i];
+				vertices[i].velocity = (p[i] - vertices[i].position)/Time.fixedDeltaTime; //fixed delta time debatable.
+				vertices[i].position = p[i];
 		}
 
 		Vector3[] updatedVertices = new Vector3[vertices.Length];
@@ -125,6 +127,17 @@ public class VertexManager : MonoBehaviour {
 	// TODO: implement according to paper 
 	void DampVelocity () { 
 		
+	}
+
+	void GenerateConstraints() { 
+
+		for (int i = 0; i < mesh.triangles.Length; i+=3) {
+			Stretch s1 = new Stretch (mesh.triangles[i], mesh.triangles[i+1], vertices[mesh.triangles[i]], vertices[mesh.triangles[i+1]]);
+			Stretch s2 = new Stretch (mesh.triangles[i+1], mesh.triangles[i+2], vertices[mesh.triangles[i+1]], vertices[mesh.triangles[i+2]]);
+			Stretch s3 = new Stretch (mesh.triangles[i+2], mesh.triangles[i], vertices[mesh.triangles[i+2]], vertices[mesh.triangles[i]]);
+			constraints.Add(s1); constraints.Add(s2); constraints.Add(s3);
+		}
+
 	}
 
 
@@ -159,16 +172,10 @@ public class VertexManager : MonoBehaviour {
 
 	}*/
 	
-	void GenerateConstraints () { 
-		for (int i = 0; i < mesh.triangles.Length; i+=3) { 
-			int index = i;
-			Constraint c1 = new Stretch(mesh.triangles[index], mesh.triangles[index+1], vertices[mesh.triangles[index]], vertices[mesh.triangles[index+1]]);
-			Constraint c2 = new Stretch(mesh.triangles[index+1], mesh.triangles[index+2], vertices[mesh.triangles[index+1]], vertices[mesh.triangles[index+2]]);
-			Constraint c3 = new Stretch(mesh.triangles[index+2], mesh.triangles[index], vertices[mesh.triangles[index+2]], vertices[mesh.triangles[index]]);
-			constraints.Add(c1); constraints.Add(c2); constraints.Add(c3);
-		}
-	}
-
+	/* The triangle array contains indices into the mesh.vertices array and its length is a multiple of 3
+	 *  
+	 */
+	
 
 
 

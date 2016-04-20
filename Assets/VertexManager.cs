@@ -13,10 +13,19 @@ public class VertexManager : MonoBehaviour {
 	public bool enableGravity = true; 
 	private int rows = 4;
 	private int columns = 9;
+	bool once = true; 
+	Mesh mesh; 
 
 
 	void Start () {
-		vertices = GetComponentsInChildren<vertex> ();
+		mesh = GetComponentInChildren<MeshFilter>().mesh;
+	
+		vertices = new vertex[mesh.vertices.Length];
+		for (int i = 0; i < mesh.vertices.Length; i++) { 
+			vertex v = new vertex(mesh.vertices[i]);
+			vertices[i] = v;
+		}
+		//Debug.Log(vertices[0].ToString());
 		constraints = new List<Constraint>();
 		GenerateConstraints();
 	}
@@ -31,8 +40,14 @@ public class VertexManager : MonoBehaviour {
 
 	void Update () { 
 		if (Input.GetKeyUp (KeyCode.Space)) { 
-			if (startSimulation) startSimulation = false; 
-			else startSimulation = true;
+			if (startSimulation) {
+				startSimulation = false; 
+				Debug.Log("Simulation Stopped!");
+			}
+			else {
+				startSimulation = true;
+				Debug.Log("Simulation Started!");
+			}
 		}
 		if (Input.GetKeyUp(KeyCode.L)) SceneManager.LoadScene("test_scene");
 	}
@@ -47,7 +62,7 @@ public class VertexManager : MonoBehaviour {
 				for (int k = 0; k < involved.Length; k++) { 
 					if (constraints[i].GetType().Name.Equals ("Stretch")) { 
 						if (j != k) { 
-							Debug.DrawLine(involved[j].transform.position, involved[k].transform.position);
+							Debug.DrawLine(involved[j].position, involved[k].position);
 						}
 					}
 					else if (constraints[i].GetType().Name.Equals ("Bend")) { 
@@ -57,15 +72,21 @@ public class VertexManager : MonoBehaviour {
 			}
 		}
 	}
+
 	IEnumerator positionBasedSimulation () { 
 		CalculateExternalForces();
 		DampVelocity();
-
+	
 		Vector3[] p = new Vector3[vertices.Length];
 		for (int i = 0; i < vertices.Length; i++) { 
-			p[i] = vertices[i].transform.position + (vertices[i].velocity * Time.fixedDeltaTime); //fixed delta time debatable.
+			p[i] = vertices[i].position + (vertices[i].velocity * Time.fixedDeltaTime); //fixed delta time debatable.
 		}
-
+		/*if (once) { 
+			for (int i = 0; i < p.Length; i++) { 
+				Debug.Log(p[i]);
+			}
+			once = false;
+		}*/
 		//TODO:generate collision constraints 
 
 		for (int i = 0; i < iterations; i++) { 
@@ -76,9 +97,16 @@ public class VertexManager : MonoBehaviour {
 
 		//velocity and position update in accordance with constraint projections 
 		for (int i = 0; i < vertices.Length; i++) { 
-			vertices[i].velocity = (p[i] - vertices[i].transform.position)/Time.fixedDeltaTime; //fixed delta time debatable.
-			vertices[i].transform.position = p[i];
+			vertices[i].velocity = (p[i] - vertices[i].position)/Time.fixedDeltaTime; //fixed delta time debatable.
+			vertices[i].position = p[i];
 		}
+
+		Vector3[] updatedVertices = new Vector3[vertices.Length];
+		for (int i = 0; i < vertices.Length; i++) { 
+			updatedVertices[i] = vertices[i].position;
+		}
+		mesh.vertices = updatedVertices;
+		mesh.RecalculateNormals();
 
 		//TODO: velocity update for collisions goes here  
 		yield return null;
@@ -103,7 +131,7 @@ public class VertexManager : MonoBehaviour {
 	/*
 	 * kind of an expensive method, but for my purposes we dont need a dynamic constraint generator, so be it
 	 */
-	void GenerateConstraints () { 
+	/*void GenerateConstraints () { 
 		vertex firstVertex = vertices[0];
 		FixedPoint fp = new FixedPoint(0, firstVertex);
 		firstVertex.GetComponent<Renderer>().material.color = Color.black;
@@ -129,8 +157,17 @@ public class VertexManager : MonoBehaviour {
 			constraints.Add(b);
 		}
 
+	}*/
+	
+	void GenerateConstraints () { 
+		for (int i = 0; i < mesh.triangles.Length; i+=3) { 
+			int index = i;
+			Constraint c1 = new Stretch(mesh.triangles[index], mesh.triangles[index+1], vertices[mesh.triangles[index]], vertices[mesh.triangles[index+1]]);
+			Constraint c2 = new Stretch(mesh.triangles[index+1], mesh.triangles[index+2], vertices[mesh.triangles[index+1]], vertices[mesh.triangles[index+2]]);
+			Constraint c3 = new Stretch(mesh.triangles[index+2], mesh.triangles[index], vertices[mesh.triangles[index+2]], vertices[mesh.triangles[index]]);
+			constraints.Add(c1); constraints.Add(c2); constraints.Add(c3);
+		}
 	}
-		
 
 
 

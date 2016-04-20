@@ -26,16 +26,16 @@ public class Bend : Constraint {
 		v2 = b;
 		v3 = c;
 		v4 = d;
-		Vector3 V = v3.transform.position - v1.transform.position;
-		Vector3 W = v2.transform.position - v1.transform.position; 
+		Vector3 V = v3.position - v1.position;
+		Vector3 W = v2.position - v1.position; 
 		float Nx = (V.y * W.z) - (V.z * W.y);
 		float Ny = (V.z * W.x) - (V.x * W.z);
 		float Nz = (V.x * W.y) - (V.y * W.x);
 		n1 = new Vector3(Nx, Ny, Nz);
 		n1.Normalize();
 
-		V = v2.transform.position - v1.transform.position;
-		W = v4.transform.position - v1.transform.position; 
+		V = v2.position - v1.position;
+		W = v4.position - v1.position; 
 		Nx = (V.y * W.z) - (V.z * W.y);
 		Ny = (V.z * W.x) - (V.x * W.z);
 		Nz = (V.x * W.y) - (V.y * W.x);

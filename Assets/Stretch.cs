@@ -8,19 +8,23 @@ public class Stretch : Constraint {
 	vertex v2;
 	float l0;
 	float stiffness = 1f; 
+	bool once = true; 
 
 	public Stretch(int ia, int ib, vertex a, vertex b) { 
 		indexV1 = ia; 
 		indexV2 = ib;
 		v1 = a;
 		v2 = b;
-		l0 = (v1.transform.position - v2.transform.position).magnitude;
+		l0 = (v1.position - v2.position).magnitude;
 	}
 
 	public void projectConstraint(Vector3[] ps) { 
 		Vector3 p1 = ps[indexV1];
 		Vector3 p2 = ps[indexV2];
-
+		if (once) { //PROBLEM DUE TO GENERATECOLLISIONCONSTRAINTS IS HERE
+			Debug.Log(p1 + ", " + p2);
+			once = false; 
+		}
 		float deltaP1Scale = -1f*(v1.w/(v1.w + v2.w))*((p1 - p2).magnitude - l0);
 		deltaP1Scale /= (p1-p2).magnitude;
 		float deltaP2Scale = -1f * deltaP1Scale;

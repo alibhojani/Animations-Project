@@ -16,16 +16,23 @@ public class VertexManager : MonoBehaviour {
 	private int columns = 9;
 	private List<vertex> triangles; 
 	private SpatialHash spatialHash;
-	private float thickness; 
+	private float thickness;
+	public GameObject prefab; 
+	private GameObject[] gos;
 
-
+	private MeshCollider MC; 
+	private Mesh mesh; 
 
 	void Start () {
 		spatialHash = new SpatialHash(2); 
-		vertices = GetComponentsInChildren<vertex> ();
-		for (int i = 0; i < vertices.Length; i++) { 
+		//vertices = GetComponentsInChildren<vertex> ();
+		MC = GetComponent<MeshCollider>();
+		mesh = GetComponent<MeshFilter>().mesh;
+
+		GenerateVertices();
+		/*for (int i = 0; i < vertices.Length; i++) { 
 			spatialHash.Insert(vertices[i].transform.position, vertices[i]);
-		}
+		}*/
 		triangles = new List<vertex>();
 		constraints = new List<Constraint>();
 		GenerateConstraints();
@@ -37,6 +44,9 @@ public class VertexManager : MonoBehaviour {
 			StartCoroutine("positionBasedSimulation");
 		}
 		DrawEdges();
+		MC.sharedMesh = null; 
+		MC.sharedMesh = mesh;
+
 	}
 
 	void Update () { 
@@ -44,7 +54,7 @@ public class VertexManager : MonoBehaviour {
 			if (startSimulation) startSimulation = false; 
 			else startSimulation = true;
 		}
-		if (Input.GetKeyUp(KeyCode.L)) SceneManager.LoadScene("test_scene");
+		if (Input.GetKeyUp(KeyCode.L)) SceneManager.LoadScene("kyleTestScene");
 	}
 
 	/*
@@ -92,6 +102,7 @@ public class VertexManager : MonoBehaviour {
 			if (float.IsNaN(p[i].x) || float.IsNaN(p[i].y) || float.IsNaN(p[i].z)) continue;
 			vertices[i].velocity = (p[i] - vertices[i].transform.position)/Time.fixedDeltaTime; //fixed delta time debatable.
 			vertices[i].transform.position = p[i];
+			gos[i].transform.position = vertices[i].transform.position;
 		}
 
 		//TODO: velocity update for collisions goes here  
@@ -164,11 +175,60 @@ public class VertexManager : MonoBehaviour {
 		}
 	}
 
+	void GenerateVertices () {
+		vertices = new vertex[12];
+		GameObject head = GameObject.Find("Head");
+		GameObject hip = GameObject.Find("Hip");
+		GameObject leftKnee = GameObject.Find("Left_Knee_Joint_01");
+		GameObject rightKnee = GameObject.Find("Right_Knee_Joint_01");
+		GameObject leftElbow = GameObject.Find("Left_Forearm_Joint_01");
+		GameObject rightElbow = GameObject.Find("Right_Forearm_Joint_01"); 
+		GameObject leftHand = GameObject.Find("Left_Wrist_Joint_01");
+		GameObject rightHand = GameObject.Find("Right_Wrist_Joint_01");
+		GameObject leftShoulder = GameObject.Find("Left_Upper_Arm_Joint_01");
+		GameObject rightShoulder = GameObject.Find("Right_Upper_Arm_Joint_01");
+		GameObject leftFoot  = GameObject.Find("Left_Ankle_Joint_01");
+		GameObject rightFoot  = GameObject.Find("Right_Ankle_Joint_01");
+		gos = new  GameObject[] {head, leftShoulder, rightShoulder, leftElbow, rightElbow, leftHand, rightHand, hip, leftKnee, rightKnee,   
+			 leftFoot, rightFoot};
+		for (int i = 0; i < gos.Length; i++) { 
+			GameObject temp = GameObject.Instantiate(prefab, gos[i].transform.position, Quaternion.identity) as GameObject;
+			vertex tempVertex = temp.GetComponent<vertex>();
+			vertices[i] = tempVertex;
+		}
+	}
+
+	//for kyle 
+	void GenerateConstraints () { 
+		FixedPoint shoulderHang = new FixedPoint(0, vertices[0]);
+		Stretch headToLeftShoulder = new Stretch (0,1,vertices[0], vertices[1]);
+		Stretch headToRightShoulder = new Stretch (0,2,vertices[0], vertices[2]);
+		Stretch leftShoulderToLeftElbow = new Stretch(1,3,vertices[1],vertices[3]);
+		Stretch rightShoulderToRightElbow = new Stretch(2,4,vertices[2],vertices[4]);
+		Stretch leftElbowToLeftHand = new Stretch(3,5,vertices[3],vertices[5]);
+		Stretch rightElbowToRightHand = new Stretch(4,6,vertices[4],vertices[6]);
+		Stretch leftShoulderToHip = new Stretch(1,7,vertices[1],vertices[7]);
+		Stretch rightShoulderToHip = new Stretch(2,7,vertices[2],vertices[7]);
+		Stretch hipToLeftKnee = new Stretch (7,8, vertices[7],vertices[8]);
+		Stretch hipToRightKnee = new Stretch (7,9, vertices[7],vertices[9]);
+		Stretch leftKneeToLeftFoot = new Stretch (8,10, vertices[8],vertices[10]);
+		Stretch rightKneeToRightFoot = new Stretch (9,11, vertices[9],vertices[11]);
+		Stretch leftShoulderToRightShoulder = new Stretch (1,2,vertices[1],vertices[2]);
+		constraints.Add(shoulderHang);
+		constraints.Add(headToLeftShoulder); constraints.Add(headToRightShoulder);
+		constraints.Add(leftShoulderToLeftElbow);constraints.Add(rightShoulderToRightElbow);
+		constraints.Add(leftElbowToLeftHand);constraints.Add(rightElbowToRightHand );
+		constraints.Add(leftShoulderToHip);constraints.Add(rightShoulderToHip);
+		constraints.Add(hipToLeftKnee);constraints.Add(hipToRightKnee);
+		constraints.Add(leftKneeToLeftFoot);constraints.Add(rightKneeToRightFoot);
+		constraints.Add(leftShoulderToRightShoulder);
+	}
+
 
 	/*
-	 * kind of an expensive method, but for my purposes we dont need a dynamic constraint generator, so be it
+	 * for cloth 
 	 */
-	void GenerateConstraints () { 
+	/*void GenerateConstraints () { 
 		vertex firstVertex = vertices[0];
 		FixedPoint fp = new FixedPoint(0, firstVertex);
 		firstVertex.GetComponent<Renderer>().material.color = Color.black;
@@ -198,7 +258,9 @@ public class VertexManager : MonoBehaviour {
 			triangles.Add(vertices[i + columns+ 1]); triangles.Add(vertices[i]); triangles.Add(vertices[i + columns]);	
 		}
 			
-	}
+	}*/
+	
+	
 
 	void GenerateCollisionConstraints (Vector3 currentPos, Vector3 projectedPos) { 
 		ArrayList nearBy = spatialHash.Query(projectedPos); 

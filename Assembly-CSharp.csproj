@@ -46,9 +46,11 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Bend.cs" />
+     <Compile Include="Assets\Collision.cs" />
      <Compile Include="Assets\Constraint.cs" />
      <Compile Include="Assets\FixedPoint.cs" />
      <Compile Include="Assets\ObjImporter.cs" />
+     <Compile Include="Assets\SpatialHash.cs" />
      <Compile Include="Assets\Stretch.cs" />
      <Compile Include="Assets\VertexManager.cs" />
      <Compile Include="Assets\vertex.cs" />

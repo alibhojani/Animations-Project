@@ -18,17 +18,10 @@ public class VertexManager : MonoBehaviour {
 	private SpatialHash spatialHash;
 	private float thickness;
 	public GameObject prefab; 
-	private GameObject[] gos;
-
-	private MeshCollider MC; 
-	private Mesh mesh; 
+	private GameObject[] gos; 
 
 	void Start () {
 		spatialHash = new SpatialHash(2); 
-		//vertices = GetComponentsInChildren<vertex> ();
-		MC = GetComponent<MeshCollider>();
-		mesh = GetComponent<MeshFilter>().mesh;
-
 		GenerateVertices();
 		/*for (int i = 0; i < vertices.Length; i++) { 
 			spatialHash.Insert(vertices[i].transform.position, vertices[i]);
@@ -44,9 +37,6 @@ public class VertexManager : MonoBehaviour {
 			StartCoroutine("positionBasedSimulation");
 		}
 		DrawEdges();
-		MC.sharedMesh = null; 
-		MC.sharedMesh = mesh;
-
 	}
 
 	void Update () { 
@@ -70,8 +60,8 @@ public class VertexManager : MonoBehaviour {
 							Debug.DrawLine(involved[j].transform.position, involved[k].transform.position);
 						}
 					}
-					else if (constraints[i].GetType().Name.Equals ("Bend")) { 
-						Debug.DrawLine(involved[0].transform.position, involved[1].transform.position, Color.magenta);
+					else if (constraints[i].GetType().Name.Equals ("Angular")) { 
+						Debug.DrawLine(involved[0].transform.position, involved[2].transform.position, Color.magenta);
 					}
 				}
 			}
@@ -86,10 +76,10 @@ public class VertexManager : MonoBehaviour {
 			p[i] = vertices[i].transform.position + (vertices[i].velocity * Time.fixedDeltaTime); //fixed delta time debatable.
 		}
 
-		//generate collision constraints 
+	/*	//generate collision constraints 
 		for (int i = 0; i < vertices.Length; i++) { 
 			GenerateCollisionConstraints(vertices[i].transform.position, p[i]);
-		}
+		}*/
 
 		for (int i = 0; i < iterations; i++) { 
 			for (int j = 0; j < constraints.Count; j++) { 
@@ -99,10 +89,10 @@ public class VertexManager : MonoBehaviour {
 
 		//velocity and position update in accordance with constraint projections 
 		for (int i = 0; i < vertices.Length; i++) { 
-			if (float.IsNaN(p[i].x) || float.IsNaN(p[i].y) || float.IsNaN(p[i].z)) continue;
 			vertices[i].velocity = (p[i] - vertices[i].transform.position)/Time.fixedDeltaTime; //fixed delta time debatable.
+			//vertices[i].transform.RotateAround(Vector3.zero, vertices[i].axis, vertices[i].angle);
 			vertices[i].transform.position = p[i];
-			gos[i].transform.position = vertices[i].transform.position;
+			///vertices[i].transform.RotateAround(Vector3.zero, vertices[i].axis, vertices[i].angle);
 		}
 
 		//TODO: velocity update for collisions goes here  
@@ -185,22 +175,23 @@ public class VertexManager : MonoBehaviour {
 		GameObject rightElbow = GameObject.Find("Right_Forearm_Joint_01"); 
 		GameObject leftHand = GameObject.Find("Left_Wrist_Joint_01");
 		GameObject rightHand = GameObject.Find("Right_Wrist_Joint_01");
-		GameObject leftShoulder = GameObject.Find("Left_Upper_Arm_Joint_01");
-		GameObject rightShoulder = GameObject.Find("Right_Upper_Arm_Joint_01");
+		GameObject leftShoulder = GameObject.Find("Left_Shoulder_Joint_01");
+		GameObject rightShoulder = GameObject.Find("Right_Shoulder_Joint_01");
 		GameObject leftFoot  = GameObject.Find("Left_Ankle_Joint_01");
 		GameObject rightFoot  = GameObject.Find("Right_Ankle_Joint_01");
 		gos = new  GameObject[] {head, leftShoulder, rightShoulder, leftElbow, rightElbow, leftHand, rightHand, hip, leftKnee, rightKnee,   
 			 leftFoot, rightFoot};
 		for (int i = 0; i < gos.Length; i++) { 
-			GameObject temp = GameObject.Instantiate(prefab, gos[i].transform.position, Quaternion.identity) as GameObject;
+			GameObject temp = GameObject.Instantiate(prefab, gos[i].transform.position, gos[i].transform.rotation) as GameObject;
 			vertex tempVertex = temp.GetComponent<vertex>();
+			gos[i].transform.SetParent(temp.transform);
 			vertices[i] = tempVertex;
 		}
 	}
 
 	//for kyle 
 	void GenerateConstraints () { 
-		FixedPoint shoulderHang = new FixedPoint(0, vertices[0]);
+		FixedPoint headHang = new FixedPoint(0, vertices[0]);
 		Stretch headToLeftShoulder = new Stretch (0,1,vertices[0], vertices[1]);
 		Stretch headToRightShoulder = new Stretch (0,2,vertices[0], vertices[2]);
 		Stretch leftShoulderToLeftElbow = new Stretch(1,3,vertices[1],vertices[3]);
@@ -214,7 +205,7 @@ public class VertexManager : MonoBehaviour {
 		Stretch leftKneeToLeftFoot = new Stretch (8,10, vertices[8],vertices[10]);
 		Stretch rightKneeToRightFoot = new Stretch (9,11, vertices[9],vertices[11]);
 		Stretch leftShoulderToRightShoulder = new Stretch (1,2,vertices[1],vertices[2]);
-		constraints.Add(shoulderHang);
+		constraints.Add(headHang);
 		constraints.Add(headToLeftShoulder); constraints.Add(headToRightShoulder);
 		constraints.Add(leftShoulderToLeftElbow);constraints.Add(rightShoulderToRightElbow);
 		constraints.Add(leftElbowToLeftHand);constraints.Add(rightElbowToRightHand );
@@ -222,6 +213,13 @@ public class VertexManager : MonoBehaviour {
 		constraints.Add(hipToLeftKnee);constraints.Add(hipToRightKnee);
 		constraints.Add(leftKneeToLeftFoot);constraints.Add(rightKneeToRightFoot);
 		constraints.Add(leftShoulderToRightShoulder);
+
+		//angular constraints 
+		Angular leftShoulderElbowHand = new Angular(1,3,5, vertices[1], vertices[3], vertices[5], 65f, 85f);
+		Angular rightShoulderElbowHand = new Angular(2,4,6, vertices[2], vertices[4], vertices[6], 65f, 85f);
+		Angular leftKneeHipRightKnee = new Angular (8,7,9,vertices[8], vertices[7], vertices[9], 20f, 40f);
+		constraints.Add(leftShoulderElbowHand); constraints.Add(rightShoulderElbowHand); 
+		constraints.Add(leftKneeHipRightKnee);
 	}
 
 

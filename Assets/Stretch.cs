@@ -31,6 +31,15 @@ public class Stretch : Constraint {
 
 		ps[indexV1] += deltaP1; 
 		ps[indexV2] += deltaP2; 
+
+		Vector3 psv1ToV1 = v1.transform.position - ps[indexV1];
+		Vector3 psv2Temp = ps[indexV2] + psv1ToV1;
+		Vector3 after = psv2Temp - v1.transform.position; //v1 to psv2Temp
+		Vector3 before = v2.transform.position - v1.transform.position;
+
+		v1.angle = Vector3.Angle(before, after);
+		v1.axis = Vector3.Cross(before, after);
+
 	}
 
 	public vertex[] getVertices () { 

@@ -8,11 +8,12 @@ public class Angular : Constraint {
 	vertex v1;
 	vertex v2;
 	vertex v3;
-	float min;
-	float max; 
-	//float restLength;
+	float min; 
+	float max;
+	float l0;
+	float restLength;
 	float stiffness = 1f; 
-	bool once = true;
+	bool disable = true;
 
 	public Angular(int ia, int ib, int ic, vertex a, vertex b, vertex c, float min, float max) { 
 		indexV1 = ia; 
@@ -23,7 +24,8 @@ public class Angular : Constraint {
 		v3 = c; 
 		this.min = min; 
 		this.max = max; 
-		//restLength = (v3.transform.position - v1.transform.position).mag
+		restLength = (v3.transform.position - v1.transform.position).magnitude;
+		l0 = restLength;
 	}
 
 	public void projectConstraint(Vector3[] ps) { 
@@ -35,24 +37,23 @@ public class Angular : Constraint {
 		float btoaLength = bToa.magnitude;
 		float btocLength = bToc.magnitude;
 		float futureAngle = Vector3.Angle(bToa, bToc);
-		float l0 = 0f;
-		bool skip = true;
 
-		if (futureAngle > max) {
+		if (futureAngle > max + stiffness) {
 			float dMax1 = Mathf.Tan(Mathf.Deg2Rad *(max/2f)) * btoaLength; 
 			float dMax2 = Mathf.Tan(Mathf.Deg2Rad *(max/2f)) * btocLength;
 			l0 = dMax1 + dMax2; 
-			skip = false; 
+			disable = false; 
 		}
-		else if (futureAngle < min) { 
+
+		else if (futureAngle < min - stiffness) { 
 			float dMin1 = Mathf.Tan(Mathf.Deg2Rad * (min/2f)) * btoaLength; 
 			float dMin2 = Mathf.Tan(Mathf.Deg2Rad *(min/2f)) * btocLength;
 			l0 = dMin1 + dMin2;
-			skip = false; 
+			disable = false; 
 		}
 
-		if (!skip) {
-			
+		if(!disable) {
+
 			float deltaP1Scale = -1f*(v1.w/(v1.w + v3.w))*((p1 - p3).magnitude - l0);
 			deltaP1Scale /= (p1-p3).magnitude;
 			float deltaP3Scale = -1f * deltaP1Scale;
@@ -63,7 +64,10 @@ public class Angular : Constraint {
 
 			ps[indexV1] += deltaP1; 
 			ps[indexV3] += deltaP3; 
+
+			disable = true; //after fixing "disable" this constraint.  
 		}
+
 
 		
 	}

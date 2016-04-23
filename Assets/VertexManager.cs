@@ -18,6 +18,7 @@ public class VertexManager : MonoBehaviour {
 	private SpatialHash spatialHash;
 	private float thickness;
 	public GameObject prefab; 
+	public GameObject boxCollider; 
 	private GameObject[] gos; 
 
 	void Start () {
@@ -192,19 +193,19 @@ public class VertexManager : MonoBehaviour {
 	//for kyle 
 	void GenerateConstraints () { 
 		FixedPoint headHang = new FixedPoint(0, vertices[0]);
-		Stretch headToLeftShoulder = new Stretch (0,1,vertices[0], vertices[1]);
-		Stretch headToRightShoulder = new Stretch (0,2,vertices[0], vertices[2]);
-		Stretch leftShoulderToLeftElbow = new Stretch(1,3,vertices[1],vertices[3]);
-		Stretch rightShoulderToRightElbow = new Stretch(2,4,vertices[2],vertices[4]);
-		Stretch leftElbowToLeftHand = new Stretch(3,5,vertices[3],vertices[5]);
-		Stretch rightElbowToRightHand = new Stretch(4,6,vertices[4],vertices[6]);
-		Stretch leftShoulderToHip = new Stretch(1,7,vertices[1],vertices[7]);
-		Stretch rightShoulderToHip = new Stretch(2,7,vertices[2],vertices[7]);
-		Stretch hipToLeftKnee = new Stretch (7,8, vertices[7],vertices[8]);
-		Stretch hipToRightKnee = new Stretch (7,9, vertices[7],vertices[9]);
-		Stretch leftKneeToLeftFoot = new Stretch (8,10, vertices[8],vertices[10]);
-		Stretch rightKneeToRightFoot = new Stretch (9,11, vertices[9],vertices[11]);
-		Stretch leftShoulderToRightShoulder = new Stretch (1,2,vertices[1],vertices[2]);
+		Stretch headToLeftShoulder = new Stretch (0,1,vertices[0], vertices[1], boxCollider);
+		Stretch headToRightShoulder = new Stretch (0,2,vertices[0], vertices[2], boxCollider);
+		Stretch leftShoulderToLeftElbow = new Stretch(1,3,vertices[1],vertices[3], boxCollider);
+		Stretch rightShoulderToRightElbow = new Stretch(2,4,vertices[2],vertices[4], boxCollider);
+		Stretch leftElbowToLeftHand = new Stretch(3,5,vertices[3],vertices[5], boxCollider);
+		Stretch rightElbowToRightHand = new Stretch(4,6,vertices[4],vertices[6], boxCollider);
+		Stretch leftShoulderToHip = new Stretch(1,7,vertices[1],vertices[7], boxCollider);
+		Stretch rightShoulderToHip = new Stretch(2,7,vertices[2],vertices[7], boxCollider);
+		Stretch hipToLeftKnee = new Stretch (7,8, vertices[7],vertices[8], boxCollider);
+		Stretch hipToRightKnee = new Stretch (7,9, vertices[7],vertices[9], boxCollider);
+		Stretch leftKneeToLeftFoot = new Stretch (8,10, vertices[8],vertices[10], boxCollider);
+		Stretch rightKneeToRightFoot = new Stretch (9,11, vertices[9],vertices[11], boxCollider);
+		Stretch leftShoulderToRightShoulder = new Stretch (1,2,vertices[1],vertices[2],boxCollider);
 		constraints.Add(headHang);
 		constraints.Add(headToLeftShoulder); constraints.Add(headToRightShoulder);
 		constraints.Add(leftShoulderToLeftElbow);constraints.Add(rightShoulderToRightElbow);

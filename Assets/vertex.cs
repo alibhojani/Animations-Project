@@ -7,8 +7,7 @@ public class vertex : MonoBehaviour {
 	public float mass; 
 	public float w; 
 	public Vector3 velocity; 
-	public float angle; 
-	public Vector3 axis; 
+	 
 
 	public vertex (Vector3 pos) { 
 		this.transform.position = pos; 

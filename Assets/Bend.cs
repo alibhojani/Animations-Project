@@ -103,4 +103,8 @@ public class Bend : Constraint {
 		return toReturn; 
 	}
 
+	public colliderScript getColliderScript (){ 
+		return null;
+	}
+
 }

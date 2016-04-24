@@ -68,14 +68,17 @@ public class Angular : Constraint {
 			disable = true; //after fixing "disable" this constraint.  
 		}
 
-
-		
 	}
 
 	public vertex[] getVertices () { 
 		vertex[] toReturn = {v1,v2, v3};
 		return toReturn; 
 	}
+
+	public colliderScript getColliderScript (){ 
+		return null;
+	}
+
 
 }
 

@@ -21,6 +21,11 @@ public class FixedPoint : Constraint {
 		vertex[] toReturn = {v};
 		return toReturn; 
 	}
+
+	public colliderScript getColliderScript (){ 
+		return null;
+	}
+
 }
 
 

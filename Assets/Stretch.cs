@@ -8,8 +8,10 @@ public class Stretch : Constraint {
 	vertex v2;
 	float l0;
 	float stiffness = 1f; 
-	float thickness = 0.25f;
+	float thickness = 0.1f;
 	private GameObject boxCollider;
+	private colliderScript script;
+
 
 	public Stretch(int ia, int ib, vertex a, vertex b, GameObject col) { 
 		indexV1 = ia; 
@@ -20,8 +22,11 @@ public class Stretch : Constraint {
 
 		Vector3 boxPos = Vector3.MoveTowards(v1.transform.position, v2.transform.position, l0/2f);
 		boxCollider = GameObject.Instantiate(col, boxPos, Quaternion.LookRotation(v1.transform.position - v2.transform.position)) as GameObject;
-		BoxCollider colliderComponent = boxCollider.GetComponent<BoxCollider>();
 		boxCollider.transform.localScale = new Vector3(thickness, thickness, l0*3.5f);
+		script = boxCollider.GetComponent<colliderScript>();
+		script.v1 = v1; 
+		script.v2 = v2; 
+		script.position = boxPos; 
 	}
 
 	public void projectConstraint(Vector3[] ps) { 
@@ -39,24 +44,26 @@ public class Stretch : Constraint {
 		ps[indexV1] += deltaP1; 
 		ps[indexV2] += deltaP2; 
 
+
 		//update boxCollider position and rotation 
 		Vector3 boxPos = Vector3.MoveTowards(ps[indexV1], ps[indexV2], l0/2f);
 		boxCollider.transform.position = boxPos;
 		boxCollider.transform.rotation = Quaternion.LookRotation(ps[indexV2] - ps[indexV1]);
+		script.position = boxPos;
 
-		/*Vector3 psv1ToV1 = v1.transform.position - ps[indexV1];
-		Vector3 psv2Temp = ps[indexV2] + psv1ToV1;
-		Vector3 after = psv2Temp - v1.transform.position; //v1 to psv2Temp
-		Vector3 before = v2.transform.position - v1.transform.position;
-
-		v1.angle = Vector3.Angle(before, after);
-		v1.axis = Vector3.Cross(before, after);*/
-
+		/*Quaternion a = 	Quaternion.LookRotation(v1.transform.position, v2.transform.position);
+		Quaternion b = 	Quaternion.LookRotation(ps[indexV2] - ps[indexV1]);
+		Vector3 axis = Vector3.Cross(v1.transform.position - v2.transform.position, ps[indexV2] - ps[indexV1]);
+		v1.transform.RotateAround(v1.transform.position, axis, Quaternion.Angle(a,b));*/	
 	}
 
 	public vertex[] getVertices () { 
 		vertex[] toReturn = {v1,v2};
 		return toReturn; 
+	}
+
+	public colliderScript getColliderScript () { 
+		return script;
 	}
 
 }

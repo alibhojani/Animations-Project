@@ -47,13 +47,13 @@
   <ItemGroup>
      <Compile Include="Assets\Angular.cs" />
      <Compile Include="Assets\Bend.cs" />
-     <Compile Include="Assets\Collision.cs" />
      <Compile Include="Assets\Constraint.cs" />
      <Compile Include="Assets\FixedPoint.cs" />
      <Compile Include="Assets\ObjImporter.cs" />
      <Compile Include="Assets\SpatialHash.cs" />
      <Compile Include="Assets\Stretch.cs" />
      <Compile Include="Assets\VertexManager.cs" />
+     <Compile Include="Assets\colliderScript.cs" />
      <Compile Include="Assets\vertex.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>

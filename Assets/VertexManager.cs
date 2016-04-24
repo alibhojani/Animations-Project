@@ -7,15 +7,14 @@ public class VertexManager : MonoBehaviour {
 	vertex[] vertices; 
 	List <Constraint> constraints;
 
-	public float iterations = 70f;
+	public int iterations = 20;
 	public float gravity = -9.81f; 
-	public float kDamping = 1f;
+	public float collisionDamping = 0.5f; //[0,1]
+	public float impulseForce = 10f; 
 	public bool enableGravity = true; 
 	private bool startSimulation = false;
-	private int rows = 4;
-	private int columns = 9;
-	private List<vertex> triangles; 
 	private SpatialHash spatialHash;
+	private List<colliderScript> colliders; 
 	private float thickness;
 	public GameObject prefab; 
 	public GameObject boxCollider; 
@@ -27,7 +26,7 @@ public class VertexManager : MonoBehaviour {
 		/*for (int i = 0; i < vertices.Length; i++) { 
 			spatialHash.Insert(vertices[i].transform.position, vertices[i]);
 		}*/
-		triangles = new List<vertex>();
+		colliders = new List<colliderScript>();
 		constraints = new List<Constraint>();
 		GenerateConstraints();
 	}
@@ -62,7 +61,7 @@ public class VertexManager : MonoBehaviour {
 						}
 					}
 					else if (constraints[i].GetType().Name.Equals ("Angular")) { 
-						Debug.DrawLine(involved[0].transform.position, involved[2].transform.position, Color.magenta);
+						//Debug.DrawLine(involved[0].transform.position, involved[2].transform.position, Color.magenta);
 					}
 				}
 			}
@@ -96,7 +95,14 @@ public class VertexManager : MonoBehaviour {
 			///vertices[i].transform.RotateAround(Vector3.zero, vertices[i].axis, vertices[i].angle);
 		}
 
-		//TODO: velocity update for collisions goes here  
+		// velocity update 
+		for (int i = 0; i < colliders.Count; i++){ 
+			if (colliders[i].isColliding){ 
+				colliders[i].v1.velocity = -collisionDamping * colliders[i].v1.velocity;
+				colliders[i].v2.velocity = -collisionDamping * colliders[i].v2.velocity;
+				colliders[i].isColliding = false; 
+			}
+		}
 		yield return null;
 	}
 
@@ -108,9 +114,10 @@ public class VertexManager : MonoBehaviour {
 			}
 		}
 
+
 	}
 
-	// TODO: implement according to paper 
+/*	// TODO: implement according to paper 
 	void DampVelocity () { 
 		//initialize xcm and mass acc
 		Vector3 xcm = new Vector3();
@@ -165,7 +172,7 @@ public class VertexManager : MonoBehaviour {
 			vertices[i].velocity += deltaVi;
 		}
 	}
-
+*/
 	void GenerateVertices () {
 		vertices = new vertex[12];
 		GameObject head = GameObject.Find("Head");
@@ -192,7 +199,7 @@ public class VertexManager : MonoBehaviour {
 
 	//for kyle 
 	void GenerateConstraints () { 
-		FixedPoint headHang = new FixedPoint(0, vertices[0]);
+	//	FixedPoint headHang = new FixedPoint(0, vertices[0]);
 		Stretch headToLeftShoulder = new Stretch (0,1,vertices[0], vertices[1], boxCollider);
 		Stretch headToRightShoulder = new Stretch (0,2,vertices[0], vertices[2], boxCollider);
 		Stretch leftShoulderToLeftElbow = new Stretch(1,3,vertices[1],vertices[3], boxCollider);
@@ -206,7 +213,7 @@ public class VertexManager : MonoBehaviour {
 		Stretch leftKneeToLeftFoot = new Stretch (8,10, vertices[8],vertices[10], boxCollider);
 		Stretch rightKneeToRightFoot = new Stretch (9,11, vertices[9],vertices[11], boxCollider);
 		Stretch leftShoulderToRightShoulder = new Stretch (1,2,vertices[1],vertices[2],boxCollider);
-		constraints.Add(headHang);
+		//constraints.Add(headHang);
 		constraints.Add(headToLeftShoulder); constraints.Add(headToRightShoulder);
 		constraints.Add(leftShoulderToLeftElbow);constraints.Add(rightShoulderToRightElbow);
 		constraints.Add(leftElbowToLeftHand);constraints.Add(rightElbowToRightHand );
@@ -215,6 +222,10 @@ public class VertexManager : MonoBehaviour {
 		constraints.Add(leftKneeToLeftFoot);constraints.Add(rightKneeToRightFoot);
 		constraints.Add(leftShoulderToRightShoulder);
 
+		for(int i = 0; i < constraints.Count; i++) { 
+			if (constraints[i].getColliderScript()!= null) colliders.Add(constraints[i].getColliderScript());
+		}
+
 		//angular constraints 
 		Angular leftShoulderElbowHand = new Angular(1,3,5, vertices[1], vertices[3], vertices[5], 65f, 85f);
 		Angular rightShoulderElbowHand = new Angular(2,4,6, vertices[2], vertices[4], vertices[6], 65f, 85f);
@@ -222,55 +233,6 @@ public class VertexManager : MonoBehaviour {
 		constraints.Add(leftShoulderElbowHand); constraints.Add(rightShoulderElbowHand); 
 		constraints.Add(leftKneeHipRightKnee);
 	}
-
-
-	/*
-	 * for cloth 
-	 */
-	/*void GenerateConstraints () { 
-		vertex firstVertex = vertices[0];
-		FixedPoint fp = new FixedPoint(0, firstVertex);
-		firstVertex.GetComponent<Renderer>().material.color = Color.black;
-		constraints.Add(fp);
-
-		for (int i = 0; i < vertices.Length; i++) { 
-			for (int j = 0; j < vertices.Length; j++) { 
-				if (i != j) { 
-					if ((vertices[i].transform.position - vertices[j].transform.position).magnitude < 1.2f) {
-						Stretch s = new Stretch(i,j,vertices[i], vertices[j]);
-						constraints.Add(s);
-					}
-				}
-			}
-		}
-		//diagonal edges 
-		for (int i = 0; i < (rows-1)*(columns-1)+2; i++) {
-			if (i%columns == (columns-1)) continue;
-			Stretch s = new Stretch(i, i+columns+1, vertices[i], vertices[i + columns+ 1]);
-			Bend b = new Bend(i, i+columns+1, i+1, i+columns, 
-			vertices[i], vertices[i+columns+1], vertices[i+1], vertices[i+columns]);
-			constraints.Add(s);
-			constraints.Add(b);
-			//create triangle t1
-			triangles.Add(vertices[i]); triangles.Add(vertices[i + columns+ 1]); triangles.Add(vertices[i+1]);
-			//create triangle t2
-			triangles.Add(vertices[i + columns+ 1]); triangles.Add(vertices[i]); triangles.Add(vertices[i + columns]);	
-		}
-			
-	}*/
-	
-	
-
-	void GenerateCollisionConstraints (Vector3 currentPos, Vector3 projectedPos) { 
-		ArrayList nearBy = spatialHash.Query(projectedPos); 
-
-	}
-		
-
-
-
-
-
 
 
 }

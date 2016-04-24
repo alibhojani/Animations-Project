@@ -6,8 +6,8 @@ public class vertex : MonoBehaviour {
 
 	public float mass; 
 	public float w; 
+	public float collisionDamping = 0.7f;
 	public Vector3 velocity; 
-	 
 
 	public vertex (Vector3 pos) { 
 		this.transform.position = pos; 
@@ -20,8 +20,11 @@ public class vertex : MonoBehaviour {
 		w = 1f/mass;
 	}
 	
-	// Update is called once per frame
-	void Update () {
+	void OnTriggerEnter (Collider other) { 
+		//velocity = -collisionDamping * velocity; 
+		//if (other.tag.Equals("ground")) {
+		//	velocity = -velocity;
 
+	//	}
 	}
 }

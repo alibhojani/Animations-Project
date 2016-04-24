@@ -9,7 +9,7 @@ public class VertexManager : MonoBehaviour {
 
 	public int iterations = 20;
 	public float gravity = -9.81f; 
-	public float collisionDamping = 0.5f; //[0,1]
+	//public float collisionDamping = 0.5f; //[0,1]
 	public float impulseForce = 10f; 
 	public bool enableGravity = true; 
 	private bool startSimulation = false;
@@ -61,13 +61,13 @@ public class VertexManager : MonoBehaviour {
 						}
 					}
 					else if (constraints[i].GetType().Name.Equals ("Angular")) { 
-						//Debug.DrawLine(involved[0].transform.position, involved[2].transform.position, Color.magenta);
+						Debug.DrawLine(involved[0].transform.position, involved[2].transform.position, Color.magenta);
 					}
 				}
 			}
 		}
 	}
-	IEnumerator positionBasedSimulation () { 
+	void positionBasedSimulation () { 
 		CalculateExternalForces();
 		//DampVelocity();
 
@@ -98,12 +98,12 @@ public class VertexManager : MonoBehaviour {
 		// velocity update 
 		for (int i = 0; i < colliders.Count; i++){ 
 			if (colliders[i].isColliding){ 
-				colliders[i].v1.velocity = -collisionDamping * colliders[i].v1.velocity;
-				colliders[i].v2.velocity = -collisionDamping * colliders[i].v2.velocity;
+				colliders[i].v1.velocity += -colliders[i].v1.collisionDamping * colliders[i].v1.velocity;
+				colliders[i].v2.velocity += -colliders[i].v1.collisionDamping * colliders[i].v2.velocity;
 				colliders[i].isColliding = false; 
 			}
 		}
-		yield return null;
+		//	yield return null;
 	}
 
 
@@ -174,8 +174,8 @@ public class VertexManager : MonoBehaviour {
 	}
 */
 	void GenerateVertices () {
-		vertices = new vertex[12];
-		GameObject head = GameObject.Find("Head");
+		vertices = new vertex[13];
+		GameObject neck = GameObject.Find("Neck");
 		GameObject hip = GameObject.Find("Hip");
 		GameObject leftKnee = GameObject.Find("Left_Knee_Joint_01");
 		GameObject rightKnee = GameObject.Find("Right_Knee_Joint_01");
@@ -187,11 +187,13 @@ public class VertexManager : MonoBehaviour {
 		GameObject rightShoulder = GameObject.Find("Right_Shoulder_Joint_01");
 		GameObject leftFoot  = GameObject.Find("Left_Ankle_Joint_01");
 		GameObject rightFoot  = GameObject.Find("Right_Ankle_Joint_01");
-		gos = new  GameObject[] {head, leftShoulder, rightShoulder, leftElbow, rightElbow, leftHand, rightHand, hip, leftKnee, rightKnee,   
-			 leftFoot, rightFoot};
+		GameObject head = GameObject.Find("Head");
+		gos = new  GameObject[] {neck, leftShoulder, rightShoulder, leftElbow, rightElbow, leftHand, rightHand, hip, leftKnee, rightKnee,   
+			leftFoot, rightFoot, head};
 		for (int i = 0; i < gos.Length; i++) { 
 			GameObject temp = GameObject.Instantiate(prefab, gos[i].transform.position, gos[i].transform.rotation) as GameObject;
 			vertex tempVertex = temp.GetComponent<vertex>();
+			//tempVertex.transform.SetParent(gos[i].transform.parent);
 			gos[i].transform.SetParent(temp.transform);
 			vertices[i] = tempVertex;
 		}
@@ -199,9 +201,10 @@ public class VertexManager : MonoBehaviour {
 
 	//for kyle 
 	void GenerateConstraints () { 
-	//	FixedPoint headHang = new FixedPoint(0, vertices[0]);
-		Stretch headToLeftShoulder = new Stretch (0,1,vertices[0], vertices[1], boxCollider);
-		Stretch headToRightShoulder = new Stretch (0,2,vertices[0], vertices[2], boxCollider);
+		//FixedPoint headHang = new FixedPoint(12, vertices[0]);
+		Stretch headToNeck = new Stretch (12,0,vertices[12], vertices[0], boxCollider);
+		Stretch neckToLeftShoulder = new Stretch (0,1,vertices[0], vertices[1], boxCollider);
+		Stretch neckToRightShoulder = new Stretch (0,2,vertices[0], vertices[2], boxCollider);
 		Stretch leftShoulderToLeftElbow = new Stretch(1,3,vertices[1],vertices[3], boxCollider);
 		Stretch rightShoulderToRightElbow = new Stretch(2,4,vertices[2],vertices[4], boxCollider);
 		Stretch leftElbowToLeftHand = new Stretch(3,5,vertices[3],vertices[5], boxCollider);
@@ -214,7 +217,8 @@ public class VertexManager : MonoBehaviour {
 		Stretch rightKneeToRightFoot = new Stretch (9,11, vertices[9],vertices[11], boxCollider);
 		Stretch leftShoulderToRightShoulder = new Stretch (1,2,vertices[1],vertices[2],boxCollider);
 		//constraints.Add(headHang);
-		constraints.Add(headToLeftShoulder); constraints.Add(headToRightShoulder);
+		constraints.Add(headToNeck);
+		constraints.Add(neckToLeftShoulder); constraints.Add(neckToRightShoulder);
 		constraints.Add(leftShoulderToLeftElbow);constraints.Add(rightShoulderToRightElbow);
 		constraints.Add(leftElbowToLeftHand);constraints.Add(rightElbowToRightHand );
 		constraints.Add(leftShoulderToHip);constraints.Add(rightShoulderToHip);
@@ -227,8 +231,8 @@ public class VertexManager : MonoBehaviour {
 		}
 
 		//angular constraints 
-		Angular leftShoulderElbowHand = new Angular(1,3,5, vertices[1], vertices[3], vertices[5], 65f, 85f);
-		Angular rightShoulderElbowHand = new Angular(2,4,6, vertices[2], vertices[4], vertices[6], 65f, 85f);
+		Angular leftShoulderElbowHand = new Angular(1,3,5, vertices[1], vertices[3], vertices[5], 40f, 85f);
+		Angular rightShoulderElbowHand = new Angular(2,4,6, vertices[2], vertices[4], vertices[6], 40f, 85f);
 		Angular leftKneeHipRightKnee = new Angular (8,7,9,vertices[8], vertices[7], vertices[9], 20f, 40f);
 		constraints.Add(leftShoulderElbowHand); constraints.Add(rightShoulderElbowHand); 
 		constraints.Add(leftKneeHipRightKnee);

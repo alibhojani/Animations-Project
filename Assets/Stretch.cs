@@ -42,8 +42,9 @@ public class Stretch : Constraint {
 		deltaP2.Scale(new Vector3(deltaP2Scale,deltaP2Scale,deltaP2Scale));
 
 		ps[indexV1] += deltaP1; 
-		ps[indexV2] += deltaP2; 
-
+		ps[indexV2] += deltaP2;
+		if (ps[indexV1].y < 0.6f) ps[indexV1].y = 0.6f;
+		if (ps[indexV2].y < 0.6f) ps[indexV2].y = 0.6f;
 
 		//update boxCollider position and rotation 
 		Vector3 boxPos = Vector3.MoveTowards(ps[indexV1], ps[indexV2], l0/2f);

@@ -7,7 +7,6 @@ public class Stretch : Constraint {
 	vertex v1;
 	vertex v2;
 	float l0;
-	float stiffness = 1f; 
 	float thickness = 0.1f;
 	private GameObject boxCollider;
 	private colliderScript script;
@@ -40,8 +39,7 @@ public class Stretch : Constraint {
 		Vector3 deltaP2 = (p1 - p2);
 		deltaP1.Scale(new Vector3(deltaP1Scale, deltaP1Scale, deltaP1Scale));
 		deltaP2.Scale(new Vector3(deltaP2Scale,deltaP2Scale,deltaP2Scale));
-
-		ps[indexV1] += deltaP1; 
+		ps[indexV1] += deltaP1;
 		ps[indexV2] += deltaP2;
 		if (ps[indexV1].y < 0.6f) ps[indexV1].y = 0.6f;
 		if (ps[indexV2].y < 0.6f) ps[indexV2].y = 0.6f;

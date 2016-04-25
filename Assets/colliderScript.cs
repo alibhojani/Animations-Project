@@ -9,10 +9,10 @@ public class colliderScript : MonoBehaviour {
 	public bool isColliding = false; 
 
 	void OnTriggerEnter (Collider other) { 
-		if (!other.tag.Equals("ground"))isColliding = true; 
+		isColliding = true; 
 	}
 
 	void OnTriggerExit (Collider other) { 
-		if (!other.tag.Equals("ground"))isColliding = false; 
+		isColliding = false; 
 	}
 }

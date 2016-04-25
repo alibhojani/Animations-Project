@@ -22,9 +22,9 @@ public class vertex : MonoBehaviour {
 	
 	void OnTriggerEnter (Collider other) { 
 		//velocity = -collisionDamping * velocity; 
-		//if (other.tag.Equals("ground")) {
-		//	velocity = -velocity;
+	if (other.tag.Equals("ground")) {
+		velocity = -velocity;
 
-	//	}
+		}
 	}
 }

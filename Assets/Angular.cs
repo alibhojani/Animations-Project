@@ -12,7 +12,6 @@ public class Angular : Constraint {
 	float max;
 	float l0;
 	float restLength;
-	float stiffness = 1f; 
 	bool disable = true;
 
 	public Angular(int ia, int ib, int ic, vertex a, vertex b, vertex c, float min, float max) { 
@@ -38,14 +37,14 @@ public class Angular : Constraint {
 		float btocLength = bToc.magnitude;
 		float futureAngle = Vector3.Angle(bToa, bToc);
 
-		if (futureAngle > max + stiffness) {
+		if (futureAngle > max) {
 			float dMax1 = Mathf.Tan(Mathf.Deg2Rad *(max/2f)) * btoaLength; 
 			float dMax2 = Mathf.Tan(Mathf.Deg2Rad *(max/2f)) * btocLength;
 			l0 = dMax1 + dMax2; 
 			disable = false; 
 		}
 
-		else if (futureAngle < min - stiffness) { 
+		else if (futureAngle < min) { 
 			float dMin1 = Mathf.Tan(Mathf.Deg2Rad * (min/2f)) * btoaLength; 
 			float dMin2 = Mathf.Tan(Mathf.Deg2Rad *(min/2f)) * btocLength;
 			l0 = dMin1 + dMin2;

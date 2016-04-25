@@ -117,62 +117,6 @@ public class VertexManager : MonoBehaviour {
 
 	}
 
-/*	// TODO: implement according to paper 
-	void DampVelocity () { 
-		//initialize xcm and mass acc
-		Vector3 xcm = new Vector3();
-		Vector3 vcm = new Vector3(); 
-		float massAccumulator = 0f; 
-
-		for (int i = 0; i < vertices.Length; i++) { 
-			Vector3 tempPos = vertices[i].transform.position;
-			tempPos.Scale(new Vector3(vertices[i].mass, vertices[i].mass, vertices[i].mass));
-			xcm += tempPos;
-			Vector3 tempVel = vertices[i].velocity;
-			tempVel.Scale(new Vector3(vertices[i].mass, vertices[i].mass, vertices[i].mass));
-			vcm += tempVel;
-			massAccumulator += vertices[i].mass;
-		}
-
-		xcm.Scale(new Vector3(1f/massAccumulator, 1f/massAccumulator, 1f/massAccumulator));
-		vcm.Scale(new Vector3(1f/massAccumulator, 1f/massAccumulator, 1f/massAccumulator));
-		if (float.IsNaN(vcm.x) || float.IsNaN(vcm.y) || float.IsNaN(vcm.z)) vcm = new Vector3();
-		Vector3 L = new Vector3();
-		Matrix4x4 I = new Matrix4x4();
-
-		for (int i = 0; i < vertices.Length; i++) { 
-			Vector3 ri = vertices[i].transform.position - xcm;
-			Vector3 mv = vertices[i].velocity;
-			mv.Scale(new Vector3(vertices[i].mass, vertices[i].mass, vertices[i].mass));
-			L += Vector3.Cross(ri, mv);
-			Matrix4x4 riSkewSem = new Matrix4x4();
-			riSkewSem.SetRow(0, new Vector4(0, -ri.z, ri.y, 0));
-			riSkewSem.SetRow(1, new Vector4(ri.z, 0, -ri.x, 0));
-			riSkewSem.SetRow(2, new Vector4(-ri.y, ri.x, 0, 0));
-			riSkewSem.SetRow(3, new Vector4(0, 0, 0, 1));
-			Matrix4x4 riSkewSemT = riSkewSem.transpose;
-			Matrix4x4 mul = riSkewSemT * riSkewSem;
-			for (int j = 0; j < 3; j++) { 
-				Vector4 temp = mul.GetRow(j);
-				temp.Scale(new Vector4(vertices[i].mass, vertices[i].mass, vertices[i].mass));
-				mul.SetRow(j, temp);
-			}
-			for (int j = 0; j < 3; j++) { 
-				Vector4 temp = I.GetRow(j) + mul.GetRow(j);
-				I.SetRow(j, temp);
-			}
-		}
-		Matrix4x4 I_inverse = I.inverse;
-		Vector3 W = I_inverse.MultiplyPoint(L);
-
-		for (int i = 0; i <vertices.Length; i++) { 
-			Vector3 ri = vertices[i].transform.position - xcm;
-			Vector3 deltaVi = vcm + Vector3.Cross(W, ri) - vertices[i].velocity;
-			deltaVi.Scale(new Vector3(kDamping, kDamping, kDamping));
-			vertices[i].velocity += deltaVi;
-		}
-	}
-*/
 	void GenerateVertices () {
 		vertices = new vertex[13];
 		GameObject neck = GameObject.Find("Neck");

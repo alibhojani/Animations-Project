@@ -48,6 +48,7 @@
      <Compile Include="Assets\Bend.cs" />
      <Compile Include="Assets\Collision.cs" />
      <Compile Include="Assets\Constraint.cs" />
+     <Compile Include="Assets\FPSDisplay.cs" />
      <Compile Include="Assets\FixedPoint.cs" />
      <Compile Include="Assets\ObjImporter.cs" />
      <Compile Include="Assets\SpatialHash.cs" />

@@ -7,12 +7,12 @@ public class VertexManager : MonoBehaviour {
 	vertex[] vertices; 
 	List <Constraint> constraints;
 
-	public float iterations = 70f;
+	public float iterations = 10f;
 	public float gravity = -9.81f; 
 	public float kDamping = 1f;
 	public bool enableGravity = true; 
 	private bool startSimulation = false;
-	private int rows = 4;
+	private int rows = 8;
 	private int columns = 9;
 	private List<vertex> triangles; 
 	private SpatialHash spatialHash;
@@ -185,7 +185,7 @@ public class VertexManager : MonoBehaviour {
 			}
 		}
 		//diagonal edges 
-		for (int i = 0; i < (rows-1)*(columns-1)+2; i++) {
+		for (int i = 0; i < (rows-1)*(columns-1)+6; i++) {
 			if (i%columns == (columns-1)) continue;
 			Stretch s = new Stretch(i, i+columns+1, vertices[i], vertices[i + columns+ 1]);
 			Bend b = new Bend(i, i+columns+1, i+1, i+columns, 
@@ -193,9 +193,9 @@ public class VertexManager : MonoBehaviour {
 			constraints.Add(s);
 			constraints.Add(b);
 			//create triangle t1
-			triangles.Add(vertices[i]); triangles.Add(vertices[i + columns+ 1]); triangles.Add(vertices[i+1]);
+			//triangles.Add(vertices[i]); triangles.Add(vertices[i + columns+ 1]); triangles.Add(vertices[i+1]);
 			//create triangle t2
-			triangles.Add(vertices[i + columns+ 1]); triangles.Add(vertices[i]); triangles.Add(vertices[i + columns]);	
+			//triangles.Add(vertices[i + columns+ 1]); triangles.Add(vertices[i]); triangles.Add(vertices[i + columns]);	
 		}
 			
 	}
